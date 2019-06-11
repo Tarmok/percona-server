@@ -639,6 +639,7 @@ typedef struct system_variables
     'COLUMN_TYPE' field.
   */
   my_bool show_old_temporals;
+  my_bool fix_utf8mb3_strings;
 } SV;
 
 /** Page fragmentation statistics */

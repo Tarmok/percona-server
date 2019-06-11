@@ -13536,6 +13536,9 @@ text_literal:
               if (thd->convert_string(&tmp, cs_con, $1.str, $1.length, cs_cli))
                 MYSQL_YYABORT;
             }
+            if (cs_con->number == 33 && thd->variables.fix_utf8mb3_strings)
+                Item_string::bolt_utf8mb4_hack(tmp.str, tmp.length, thd);
+
             $$= new (thd->mem_root) Item_string(tmp.str, tmp.length, cs_con,
                                                 DERIVATION_COERCIBLE,
                                                 repertoire);

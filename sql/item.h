@@ -2915,6 +2915,32 @@ public:
     // it is constant => can be used without fix_fields (and frequently used)
     fixed= 1;
   }
+
+#define IS_CONTINUATION_BYTE(c) (((c) ^ 0x80) < 0x40)
+static void bolt_utf8mb4_hack(const char *str,const uint length, THD *thd )
+{
+	uint8_t *arr;
+	arr = (uint8_t *)str;
+	uint pos = 0;
+    bool char_fixed = false;
+
+    while (pos < length) {
+        // check for utf8mb4 beginning
+        if( (arr[pos] >= 0xF0 && arr[pos] < 0xF8) && pos+3 < length){
+            // found valid utf8mb4 start byte, check for continuation bytes
+            if (IS_CONTINUATION_BYTE(arr[pos+1]) && IS_CONTINUATION_BYTE(arr[pos+2]) && IS_CONTINUATION_BYTE(arr[pos+3]) ){
+                // replace utf8mb4 bytes with '????'
+                *((uint32_t *)&arr[pos]) = 0x3F3F3F3F;
+                pos += 3; // skip replaced characters
+                char_fixed = true;
+            }
+        }
+        pos++;
+    }
+    if (char_fixed)
+        push_warning(thd, Sql_condition::WARN_LEVEL_WARN,
+                     1300, "Invalid utf8mb4 character in utf8mb3 string");
+}
   /*
     This is used in stored procedures to avoid memory leaks and
     does a deep copy of its argument.

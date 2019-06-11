@@ -5377,3 +5377,8 @@ static Sys_var_mybool Sys_show_old_temporals(
         ON_CHECK(0), ON_UPDATE(0),
         DEPRECATED(""));
 
+static Sys_var_mybool Sys_fix_utf8mb3_strings(
+        "fix_utf8mb3_strings",
+        "Replace utf8mb4 chars with ???? in utf8mb3 strings",
+        SESSION_VAR(fix_utf8mb3_strings), CMD_LINE(OPT_ARG),
+        DEFAULT(TRUE));
